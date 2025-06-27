@@ -6,7 +6,7 @@
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecobee Data Export</title>
+    <title>Export Data</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,28 +31,29 @@
 
 <body>
     <h1>Export Ecobee Data</h1>
-    <!-- <button onclick="exportData()">Export Ecobee Data</button>
-    <div id="loader">In Progress...</div> -->
-    <!-- <button id="loadingButton" class="btn btn-primary" type="button" onclick="exportData()">
-        <span id="buttonLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
-            style="display: none;"></span>
-        <span id="buttonText">Export Ecobee Data</span>
-    </button> -->
     <button id="loadingButton" class="btn btn-primary" type="button" onclick="exportData()">
         <span id="buttonLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
             style="display: none;"></span>
         <span id="buttonText">Export Ecobee Data</span>
     </button>
+    <!-- <h1>Export Yale Data</h1>
+    <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportData()">
+        <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
+            style="display: none;"></span>
+        <span id="buttonYaleText">Export Ecobee Data</span>
+    </button> -->
     <script>
-        let isLoading = false;
+        let isEcobbeLoading = false;
+        // let isYaleLoading = false;
+        // let isOdooLoading = false;
         function exportData() {
-            if (isLoading === true) {
+            if (isEcobbeLoading === true) {
                 alert('Already in progress!');
                 return;
             }
-            isLoading = true;
+            isEcobbeLoading = true;
             // Show loader and update button
-            updateButtonState();
+            updateEcobeeButtonState();
             // document.getElementById('loader').style.display = 'block';
             fetch('/export-ecobee')
                 .then(response => {
@@ -70,8 +71,8 @@
                     a.click();
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
-                    isLoading = false; // Reset loading
-                    updateButtonState();
+                    isEcobbeLoading = false; // Reset loading
+                    updateEcobeeButtonState();
                     // document.getElementById('loader').style.display = 'none';
                     alert('Download Completed!');
                 })
@@ -79,17 +80,55 @@
                     console.error('Error:', error);
                     alert('Something went wrong!');
                     // document.getElementById('loader').style.display = 'none';
-                    isLoading = false; // Reset loading
-                    updateButtonState();
+                    isEcobbeLoading = false; // Reset loading
+                    updateEcobeeButtonState();
                 });
         }
 
-        function updateButtonState() {
+        // function exportYaleData() {
+        //     if (isYaleLoading === true) {
+        //         alert('Already in progress!');
+        //         return;
+        //     }
+        //     isYaleLoading = true;
+        //     // Show loader and update button
+        //     updateYaleButtonState();
+        //     // document.getElementById('loader').style.display = 'block';
+        //     fetch('/export-yale')
+        //         .then(response => {
+        //             if (!response.ok) {
+        //                 throw new Error('Network response was not ok');
+        //             }
+        //             return response.blob();
+        //         })
+        //         .then(blob => {
+        //             const url = window.URL.createObjectURL(blob);
+        //             const a = document.createElement('a');
+        //             a.href = url;
+        //             a.download = 'ecobee_device_status.xlsx';
+        //             document.body.appendChild(a);
+        //             a.click();
+        //             document.body.removeChild(a);
+        //             window.URL.revokeObjectURL(url);
+        //             isYaleLoading = false; // Reset loading
+        //             updateYaleButtonState();
+        //             // document.getElementById('loader').style.display = 'none';
+        //             alert('Download Completed!');
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //             alert('Something went wrong!');
+        //             // document.getElementById('loader').style.display = 'none';
+        //             isYaleLoading = false; // Reset loading
+        //             updateYaleButtonState();
+        //         });
+        // }
+        function updateEcobeeButtonState() {
             const button = document.getElementById('loadingButton');
             const loader = document.getElementById('buttonLoader');
             const buttonText = document.getElementById('buttonText');
 
-            if (isLoading) {
+            if (isEcobbeLoading) {
                 // ✅ Loader visible, disable button
                 loader.style.display = 'inline-block';
                 buttonText.innerText = 'Loading...';
@@ -101,6 +140,24 @@
                 button.disabled = false;
             }
         }
+
+        // function updateYaleButtonState() {
+        //     const button = document.getElementById('loadingYaleButton');
+        //     const loader = document.getElementById('buttonYaleLoader');
+        //     const buttonText = document.getElementById('buttonYaleText');
+
+        //     if (isYaleLoading) {
+        //         // ✅ Loader visible, disable button
+        //         loader.style.display = 'inline-block';
+        //         buttonText.innerText = 'Loading...';
+        //         button.disabled = true;
+        //     } else {
+        //         // ✅ Loader hidden, enable button
+        //         loader.style.display = 'none';
+        //         buttonText.innerText = 'Export Ecobee Data';
+        //         button.disabled = false;
+        //     }
+        // }
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

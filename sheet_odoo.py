@@ -344,7 +344,7 @@ def getUnitById(data):
 
     return result
 
-if __name__ == "__main__":
+def getUnitsDataList():
     devices = getUnitsList()
     all_unit_data = []
     # unit_data = getUnitById({
@@ -365,3 +365,26 @@ if __name__ == "__main__":
         print("✅ Data exported to unit_device_data.xlsx")
     else:
         print("⚠️ No data to export.")
+
+if __name__ == "__main__":
+    getUnitsDataList()
+    # devices = getUnitsList()
+    # all_unit_data = []
+    # # unit_data = getUnitById({
+    # #         "id": 541,
+    # #         "name": "548",
+    # #         "code": "67813b3124919e25abe9008d"
+    # #     })
+    # # if unit_data:
+    # #     all_unit_data.extend(unit_data)
+    # for d in devices:
+    #     unit_data = getUnitById(d)
+    #     if unit_data:
+    #         all_unit_data.extend(unit_data)
+    # print(all_unit_data)
+    # if all_unit_data:
+    #     df = pd.DataFrame(all_unit_data)
+    #     df.to_excel("unit_device_data.xlsx", index=False)
+    #     print("✅ Data exported to unit_device_data.xlsx")
+    # else:
+    #     print("⚠️ No data to export.")

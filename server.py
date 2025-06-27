@@ -11,7 +11,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
-            # Serve the index.html page
             try:
                 with open('index.html', 'rb') as file:
                     content = file.read()
@@ -38,6 +37,23 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.send_error(500, "Error sending the file.")
             else:
                 self.send_error(500, "Failed to export Ecobee data")
+        # elif self.path == '/export-yale':
+        #     output_file = ecobee_device_status.get_ecobee_device_status()
+        #     if output_file and os.path.exists(output_file):
+        #         # Send file as response
+        #         self.send_response(200)
+        #         self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        #         self.send_header('Content-Disposition', f'attachment; filename="{output_file}"')
+        #         self.end_headers()
+        #         try:
+        #             with open(output_file, 'rb') as file:
+        #                 self.wfile.write(file.read())
+        #                 logging.info(f"File '{output_file}' sent successfully.")
+        #         except Exception as file_error:
+        #             logging.error(f"Error reading or sending the file: {file_error}")
+        #             self.send_error(500, "Error sending the file.")
+        #     else:
+        #         self.send_error(500, "Failed to export Ecobee data")
         else:
             self.send_error(404, "Page Not Found")
 
