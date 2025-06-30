@@ -16,7 +16,8 @@ PROJECT_DIR="/home/ubuntu/$PROJECT_NAME"
 PYTHON_VERSION="python3.11"
 REQUIRED_PYTHON_VERSION="3.11"
 DJANGO_PORT="8000"
-DOMAIN_NAME="yourdomain.com"  # For nginx setup
+# DOMAIN_NAME="yourdomain.com"
+DOMAIN_NAME="_"  # For nginx setup
 # --------------------------
 
 echo "Updating system packages..."
