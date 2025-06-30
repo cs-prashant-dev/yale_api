@@ -42,6 +42,12 @@
             style="display: none;"></span>
         <span id="buttoOdooText">Export Odoo Data</span>
     </button>
+    <h1>Export Yale Data</h1>
+    <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportYaleData()">
+        <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
+            style="display: none;"></span>
+        <span id="buttoYaleText">Export Yale Data</span>
+    </button>
     <!-- <h1>Export Yale Data</h1>
     <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportData()">
         <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
@@ -50,7 +56,7 @@
     </button> -->
     <script>
         let isEcobbeLoading = false;
-        // let isYaleLoading = false;
+        let isYaleLoading = false;
         let isOdooLoading = false;
         function exportData() {
             if (isEcobbeLoading === true) {
@@ -127,6 +133,43 @@
                     updateOdooButtonState();
                 });
         }
+
+        function exportYaleData() {
+            if (isYaleLoading === true) {
+                alert('Already in progress!');
+                return;
+            }
+            isYaleLoading = true;
+            // Show loader and update button
+            updateYaleButtonState();
+            // document.getElementById('loader').style.display = 'block';
+            fetch('/export-yale-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'yale_data.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    isYaleLoading = false;
+                    updateYaleButtonState();
+                    alert('Download Completed!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong!');
+                    isYaleLoading = false;
+                    updateYaleButtonState();
+                });
+        }
         function updateEcobeeButtonState() {
             const button = document.getElementById('loadingButton');
             const loader = document.getElementById('buttonLoader');
@@ -163,23 +206,23 @@
             }
         }
 
-        // function updateYaleButtonState() {
-        //     const button = document.getElementById('loadingYaleButton');
-        //     const loader = document.getElementById('buttonYaleLoader');
-        //     const buttonText = document.getElementById('buttonYaleText');
+        function updateYaleButtonState() {
+            const button = document.getElementById('loadingYaleButton');
+            const loader = document.getElementById('buttonYaleLoader');
+            const buttonText = document.getElementById('buttoYaleText');
 
-        //     if (isYaleLoading) {
-        //         // ✅ Loader visible, disable button
-        //         loader.style.display = 'inline-block';
-        //         buttonText.innerText = 'Loading...';
-        //         button.disabled = true;
-        //     } else {
-        //         // ✅ Loader hidden, enable button
-        //         loader.style.display = 'none';
-        //         buttonText.innerText = 'Export Ecobee Data';
-        //         button.disabled = false;
-        //     }
-        // }
+            if (isYaleLoading) {
+                // ✅ Loader visible, disable button
+                loader.style.display = 'inline-block';
+                buttonText.innerText = 'Loading...';
+                button.disabled = true;
+            } else {
+                // ✅ Loader hidden, enable button
+                loader.style.display = 'none';
+                buttonText.innerText = 'Export Yale Data';
+                button.disabled = false;
+            }
+        }
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
