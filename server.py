@@ -1,7 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import json
 PORT = 8000
-import ecobee_device_status
+import allistic_server.exporter.ecobee_device_status as ecobee_device_status
 import os
 import logging
 

@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import json
+import os
 
 ECOBEE_URL = "https://api.sb.ecobee.com"
 BASE_URL = f"{ECOBEE_URL}/api/v1"
@@ -42,7 +43,9 @@ def get_ecobee_device_status():
 
     # thermostat_ids = [item.get("serial_no") for item in thermostate_datas]
     # Step 2: For each thermostat, get its status
-    excel_file_path = "ecobee_device_with_unit.xlsx"  # Change to your file path
+    # excel_file_path = "ecobee_device_with_unit.xlsx"  # Change to your file path
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Current file directory
+    excel_file_path = os.path.join(base_dir, 'ecobee_device_with_unit.xlsx')
     df = pd.read_excel(excel_file_path)
     thermostate_datas = df.to_dict(orient='records')
     results = []
