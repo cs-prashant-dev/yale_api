@@ -36,6 +36,12 @@
             style="display: none;"></span>
         <span id="buttonText">Export Ecobee Data</span>
     </button>
+    <h1>Export Odoo Data</h1>
+    <button id="loadingOdooButton" class="btn btn-primary" type="button" onclick="exportOdooData()">
+        <span id="buttonOdooLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
+            style="display: none;"></span>
+        <span id="buttoOdooText">Export Odoo Data</span>
+    </button>
     <!-- <h1>Export Yale Data</h1>
     <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportData()">
         <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
@@ -45,7 +51,7 @@
     <script>
         let isEcobbeLoading = false;
         // let isYaleLoading = false;
-        // let isOdooLoading = false;
+        let isOdooLoading = false;
         function exportData() {
             if (isEcobbeLoading === true) {
                 alert('Already in progress!');
@@ -85,44 +91,42 @@
                 });
         }
 
-        // function exportYaleData() {
-        //     if (isYaleLoading === true) {
-        //         alert('Already in progress!');
-        //         return;
-        //     }
-        //     isYaleLoading = true;
-        //     // Show loader and update button
-        //     updateYaleButtonState();
-        //     // document.getElementById('loader').style.display = 'block';
-        //     fetch('/export-yale')
-        //         .then(response => {
-        //             if (!response.ok) {
-        //                 throw new Error('Network response was not ok');
-        //             }
-        //             return response.blob();
-        //         })
-        //         .then(blob => {
-        //             const url = window.URL.createObjectURL(blob);
-        //             const a = document.createElement('a');
-        //             a.href = url;
-        //             a.download = 'ecobee_device_status.xlsx';
-        //             document.body.appendChild(a);
-        //             a.click();
-        //             document.body.removeChild(a);
-        //             window.URL.revokeObjectURL(url);
-        //             isYaleLoading = false; // Reset loading
-        //             updateYaleButtonState();
-        //             // document.getElementById('loader').style.display = 'none';
-        //             alert('Download Completed!');
-        //         })
-        //         .catch(error => {
-        //             console.error('Error:', error);
-        //             alert('Something went wrong!');
-        //             // document.getElementById('loader').style.display = 'none';
-        //             isYaleLoading = false; // Reset loading
-        //             updateYaleButtonState();
-        //         });
-        // }
+        function exportOdooData() {
+            if (isOdooLoading === true) {
+                alert('Already in progress!');
+                return;
+            }
+            isOdooLoading = true;
+            // Show loader and update button
+            updateOdooButtonState();
+            // document.getElementById('loader').style.display = 'block';
+            fetch('/export-odoo-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'odoo_data.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    isOdooLoading = false;
+                    updateOdooButtonState();
+                    alert('Download Completed!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong!');
+                    isOdooLoading = false;
+                    updateOdooButtonState();
+                });
+        }
         function updateEcobeeButtonState() {
             const button = document.getElementById('loadingButton');
             const loader = document.getElementById('buttonLoader');
@@ -137,6 +141,24 @@
                 // ✅ Loader hidden, enable button
                 loader.style.display = 'none';
                 buttonText.innerText = 'Export Ecobee Data';
+                button.disabled = false;
+            }
+        }
+
+        function updateOdooButtonState() {
+            const button = document.getElementById('loadingOdooButton');
+            const loader = document.getElementById('buttonOdooLoader');
+            const buttonText = document.getElementById('buttoOdooText');
+
+            if (isOdooLoading) {
+                // ✅ Loader visible, disable button
+                loader.style.display = 'inline-block';
+                buttonText.innerText = 'Loading...';
+                button.disabled = true;
+            } else {
+                // ✅ Loader hidden, enable button
+                loader.style.display = 'none';
+                buttonText.innerText = 'Export Odoo Data';
                 button.disabled = false;
             }
         }
