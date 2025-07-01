@@ -9,15 +9,12 @@ set -e
 
 # ----- Configuration -----
 PROJECT_NAME="allistic_server"
-# GIT_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# GIT_REPO="https://cs-prashant-dev:$GIT_TOKEN@github.com/cs-prashant-dev/yale_api.git"
 GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"  # Replace with your repo
 PROJECT_DIR="/home/ubuntu/$PROJECT_NAME"
-PYTHON_VERSION="python3.11"
-REQUIRED_PYTHON_VERSION="3.11"
+PYTHON_VERSION="python3.12"
+REQUIRED_PYTHON_VERSION="3.12"
 DJANGO_PORT="8000"
-# DOMAIN_NAME="yourdomain.com"
-DOMAIN_NAME="_"  # For nginx setup
+DOMAIN_NAME="allistic.cschat.confidosoft.in"  # For nginx setup
 # --------------------------
 
 echo "Updating system packages..."
@@ -55,17 +52,18 @@ echo "Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
+cd $PROJECT_DIR/$PROJECT_NAME
 echo "Running Django migrations..."
 python manage.py migrate
 
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
+# echo "Collecting static files..."
+# python manage.py collectstatic --noinput
 
 echo "Testing Gunicorn..."
 gunicorn --bind 0.0.0.0:$DJANGO_PORT $PROJECT_NAME.wsgi:application --daemon
 
 echo "Creating Gunicorn service..."
-sudo tee /etc/systemd/system/gunicorn.service > /dev/null <<EOF
+sudo tee /etc/systemd/system/gunicorn_$PROJECT_NAME.service > /dev/null <<EOF
 [Unit]
 Description=gunicorn daemon for $PROJECT_NAME
 After=network.target
@@ -80,9 +78,12 @@ ExecStart=$PROJECT_DIR/venv/bin/gunicorn --access-logfile - --workers 3 --bind u
 WantedBy=multi-user.target
 EOF
 
+echo "Reloading systemd to register new service..."
+sudo systemctl daemon-reload
+
 echo "Starting and enabling Gunicorn..."
-sudo systemctl start gunicorn
-sudo systemctl enable gunicorn
+sudo systemctl start gunicorn_$PROJECT_NAME
+sudo systemctl enable gunicorn_$PROJECT_NAME
 
 echo "Configuring Nginx..."
 sudo tee /etc/nginx/sites-available/$PROJECT_NAME > /dev/null <<EOF
