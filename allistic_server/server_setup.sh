@@ -58,7 +58,9 @@ echo "Running Django migrations..."
 python manage.py migrate
 
 # echo "Collecting static files..."
-# python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
+
+sudo ufw allow $DJANGO_PORT
 
 echo "Testing Gunicorn..."
 gunicorn --bind 0.0.0.0:$DJANGO_PORT $PROJECT_NAME.wsgi:application --daemon
@@ -119,7 +121,7 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:$PROJECT_DIR/gunicorn_$PROJECT_NAME.sock;
+        proxy_pass http://unix:/run/gunicorn_$PROJECT_NAME.sock;
     }
 }
 EOF
