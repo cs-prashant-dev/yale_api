@@ -50,6 +50,7 @@ source venv/bin/activate
 
 echo "Installing Python dependencies..."
 pip install --upgrade pip
+pip install Django gunicorn
 pip install -r requirements.txt
 
 cd $PROJECT_DIR/$PROJECT_NAME
@@ -62,17 +63,36 @@ python manage.py migrate
 echo "Testing Gunicorn..."
 gunicorn --bind 0.0.0.0:$DJANGO_PORT $PROJECT_NAME.wsgi:application --daemon
 
+deactivate
+
+echo "Creating Gunicorn socket..."
+sudo tee /etc/systemd/system/gunicorn_$PROJECT_NAME.socket > /dev/null <<EOF
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn_$PROJECT_NAME.sock
+
+[Install]
+WantedBy=sockets.target
+EOF
+
 echo "Creating Gunicorn service..."
 sudo tee /etc/systemd/system/gunicorn_$PROJECT_NAME.service > /dev/null <<EOF
 [Unit]
 Description=gunicorn daemon for $PROJECT_NAME
+Requires=gunicorn_$PROJECT_NAME.socket
 After=network.target
 
 [Service]
 User=ubuntu
 Group=www-data
 WorkingDirectory=$PROJECT_DIR
-ExecStart=$PROJECT_DIR/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:$PROJECT_DIR/$PROJECT_NAME.sock $PROJECT_NAME.wsgi:application
+ExecStart=$PROJECT_DIR/venv/bin/gunicorn \
+  --access-logfile - \
+  --workers 3 \
+  --bind unix:/run/gunicorn_$PROJECT_NAME.sock \
+  $PROJECT_NAME.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -82,8 +102,9 @@ echo "Reloading systemd to register new service..."
 sudo systemctl daemon-reload
 
 echo "Starting and enabling Gunicorn..."
-sudo systemctl start gunicorn_$PROJECT_NAME
-sudo systemctl enable gunicorn_$PROJECT_NAME
+sudo systemctl start gunicorn_$PROJECT_NAME.socket
+sudo systemctl enable gunicorn_$PROJECT_NAME.socket
+sudo systemctl status gunicorn_$PROJECT_NAME.socket
 
 echo "Configuring Nginx..."
 sudo tee /etc/nginx/sites-available/$PROJECT_NAME > /dev/null <<EOF
@@ -98,7 +119,7 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:$PROJECT_DIR/$PROJECT_NAME.sock;
+        proxy_pass http://unix:$PROJECT_DIR/gunicorn_$PROJECT_NAME.sock;
     }
 }
 EOF
