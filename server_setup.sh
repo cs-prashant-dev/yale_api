@@ -9,7 +9,8 @@ set -e
 
 # ----- Configuration -----
 PROJECT_NAME="allistic_server"
-GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"  # Replace with your repo
+GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"
+BRANCH="v1"
 SYSTEM_USER="django"
 PROJECT_DIR="/home/$SYSTEM_USER/$PROJECT_NAME"
 PYTHON_VERSION="python3.12"
@@ -20,7 +21,7 @@ SLEEP_TIME=5
 ENABLE_SSL="True"
 ADMIN_EMAIL="prashant.prajapati@confidosoft.in"
 # --------------------------
-/home/django/allistic_server/allistic_server
+
 if ! id $SYSTEM_USER &>/dev/null; then
   echo "✅ Creating system user 'django'..."
   sudo adduser --system --group --home /home $SYSTEM_USER
@@ -50,8 +51,7 @@ echo "Installing required packages (excluding Python)..."
 sudo apt install -y python3-pip nginx git
 
 echo "Cloning Django project..."
-git clone $GIT_REPO $PROJECT_DIR
-
+git clone -b "$BRANCH" --single-branch "$GIT_REPO" "$PROJECT_DIR"
 cd $PROJECT_DIR
 
 echo "Creating virtual environment..."
