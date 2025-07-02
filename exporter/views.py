@@ -6,7 +6,8 @@ from exporter import yale_sheet
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 def index(request):
     return render(request, 'index.html')
@@ -17,10 +18,10 @@ def export_ecobee(request):
         try:
             file = open(output_file, 'rb')
             response = FileResponse(file, as_attachment=True, filename=output_file)
-            logging.info(f"File '{output_file}' sent successfully.")
+            logger.info(f"File '{output_file}' sent successfully.")
             return response
         except Exception as file_error:
-            logging.error(f"Error reading or sending the file: {file_error}")
+            logger.error(f"Error reading or sending the file: {file_error}")
             return HttpResponse("Error sending the file.", status=500)
     else:
         return HttpResponse("Failed to export Ecobee data", status=500)
@@ -31,10 +32,10 @@ def export_odoo_data(request):
         try:
             file = open(output_file, 'rb')
             response = FileResponse(file, as_attachment=True, filename=output_file)
-            logging.info(f"File '{output_file}' sent successfully.")
+            logger.info(f"File '{output_file}' sent successfully.")
             return response
         except Exception as file_error:
-            logging.error(f"Error reading or sending the file: {file_error}")
+            logger.error(f"Error reading or sending the file: {file_error}")
             return HttpResponse("Error sending the file.", status=500)
     else:
         return HttpResponse("Failed to export Ecobee data", status=500)
@@ -45,10 +46,10 @@ def export_yale_data(request):
         try:
             file = open(output_file, 'rb')
             response = FileResponse(file, as_attachment=True, filename=output_file)
-            logging.info(f"File '{output_file}' sent successfully.")
+            logger.info(f"File '{output_file}' sent successfully.")
             return response
         except Exception as file_error:
-            logging.error(f"Error reading or sending the file: {file_error}")
+            logger.error(f"Error reading or sending the file: {file_error}")
             return HttpResponse("Error sending the file.", status=500)
     else:
         return HttpResponse("Failed to export Ecobee data", status=500)
