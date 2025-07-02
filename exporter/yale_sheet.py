@@ -2,6 +2,7 @@
 import requests
 import pandas as pd
 import os
+from django.conf import settings
 
 BASE_URL = 'https://api.august.com'
 AUGUST_API_KEY = '9b4c5068-34c5-43af-90e8-d9a31c04565b'
@@ -88,6 +89,8 @@ def getYaleData():
 
 def export_to_excel(data, file_name='locks_details.xlsx'):
     df = pd.DataFrame(data)
-    df.to_excel(file_name, index=False)
-    file_path = os.path.abspath(file_name)  # Get full absolute path
+    file_path = os.path.join(settings.BASE_DIR, 'exports', 'unit_device_data.xlsx')
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    df.to_excel(file_path, index=False)
+    # file_path = os.path.abspath(file_name)  # Get full absolute path
     return file_path
