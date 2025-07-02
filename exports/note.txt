@@ -1,0 +1,14 @@
+# Make your app user the owner, and group to www-data
+sudo chown -R allistic_app_django:www-data /home/allistic_app_django/allistic_server/exports
+
+# Give read/write/execute to owner and group; none to others
+sudo chmod -R 770 /home/allistic_app_django/allistic_server/exports
+
+# Ensure new files inherit the group
+sudo chmod g+s /home/allistic_app_django/allistic_server/exports
+
+🧭 3. Verify the settings
+ls -ld /home/allistic_app_django/allistic_server/exports
+
+You should see something like:
+drwxrws--- 2 allistic_app_django www-data ... exports
