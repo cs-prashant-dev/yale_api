@@ -125,31 +125,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-LOG_DIR = os.path.join(BASE_DIR, 'logs')
-os.makedirs(LOG_DIR, exist_ok=True)
+# LOG_DIR = os.path.join(BASE_DIR, 'logs')
+# os.makedirs(LOG_DIR, exist_ok=True)
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,  # Keep default Django/Gunicorn loggers
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} {levelname:<8} {name}:{lineno} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_DIR, 'app.log'),
-            'formatter': 'verbose',
-        },
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['file', 'console'],
-        'level': 'INFO',
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,  # Keep default Django/Gunicorn loggers
+#     'formatters': {
+#         'verbose': {
+#             'format': '{asctime} {levelname:<8} {name}:{lineno} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'file': {
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(LOG_DIR, 'app.log'),
+#             'formatter': 'verbose',
+#         },
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'root': {
+#         'handlers': ['file', 'console'],
+#         'level': 'INFO',
+#     },
+# }
