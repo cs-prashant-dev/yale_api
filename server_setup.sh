@@ -11,7 +11,7 @@ set -e
 PROJECT_NAME="allistic_server"
 GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"
 BRANCH="v1"
-SYSTEM_USER="django"
+SYSTEM_USER="allistic_django"
 PROJECT_DIR="/home/$SYSTEM_USER/$PROJECT_NAME"
 PYTHON_VERSION="python3.12"
 REQUIRED_PYTHON_VERSION="3.12"
@@ -63,7 +63,7 @@ pip install --upgrade pip
 pip install Django gunicorn
 pip install -r requirements.txt
 
-cd $PROJECT_DIR/$PROJECT_NAME
+# cd $PROJECT_DIR
 echo "Running Django migrations..."
 python manage.py migrate
 sleep $SLEEP_TIME
@@ -117,8 +117,8 @@ sudo systemctl start gunicorn_$PROJECT_NAME.socket
 sudo systemctl enable gunicorn_$PROJECT_NAME.socket
 
 echo "Checking Gunicorn socket status..."
-file /run/gunicorn_$PROJECT_NAME.sock
-sudo journalctl -u gunicorn_$PROJECT_NAME.socket
+# file /run/gunicorn_$PROJECT_NAME.sock
+# sudo journalctl -u gunicorn_$PROJECT_NAME.socket
 sudo systemctl status gunicorn_$PROJECT_NAME.socket
 sleep $SLEEP_TIME
 
