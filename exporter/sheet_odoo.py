@@ -1,5 +1,7 @@
 import requests
 import pandas as pd
+from django.conf import settings
+import os
 
 BASE_URL = "https://staging.allistic.co"
 COOKIE = 'color_scheme=light; frontend_lang=en_US; session_id=c33110f96f62b8f20cd1de5a0b1983265dd9d4a9'
@@ -364,7 +366,9 @@ def getUnitsDataList():
 
     if all_unit_data:
         df = pd.DataFrame(all_unit_data)
-        file_path = "unit_device_data.xlsx"
+        # file_path = "unit_device_data.xlsx"
+        file_path = os.path.join(settings.BASE_DIR, 'exports', 'unit_device_data.xlsx')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         df.to_excel(file_path, index=False)
         print(f"✅ Data exported to {file_path}")
         return file_path
