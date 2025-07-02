@@ -22,9 +22,9 @@ def export_ecobee(request):
             return response
         except Exception as file_error:
             logger.error(f"Error reading or sending the file: {file_error}")
-            return HttpResponse("Error sending the file.", status=400)
+            return HttpResponse("Error sending the file.", status=500)
     else:
-        return HttpResponse("Failed to export Ecobee data", status=500)
+        return HttpResponse("Failed to export Ecobee data", status=400)
 
 def export_odoo_data(request):
     output_file = sheet_odoo.getUnitsDataList()
