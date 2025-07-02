@@ -11,12 +11,12 @@ set -e
 PROJECT_NAME="allistic_server"
 GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"
 BRANCH="v1"
-SYSTEM_USER="allistic_django"
+SYSTEM_USER="allistic_app_five_django"
 PROJECT_DIR="/home/$SYSTEM_USER/$PROJECT_NAME"
 PYTHON_VERSION="python3.12"
 REQUIRED_PYTHON_VERSION="3.12"
 DJANGO_PORT="8000"
-DOMAIN_NAME="allistic3.cschat.confidosoft.in"  # For nginx setup
+DOMAIN_NAME="allistic5.cschat.confidosoft.in"  # For nginx setup
 SLEEP_TIME=5
 ENABLE_SSL="True"
 ADMIN_EMAIL="prashant.prajapati@confidosoft.in"
@@ -99,6 +99,7 @@ User=$SYSTEM_USER
 Group=www-data
 WorkingDirectory=$PROJECT_DIR
 ExecStart=$PROJECT_DIR/venv/bin/gunicorn \
+  --timeout 300 \
   --access-logfile - \
   --workers 3 \
   --bind unix:/run/gunicorn_$PROJECT_NAME.sock \
@@ -137,9 +138,23 @@ server {
         root $PROJECT_DIR;
     }
 
+    location /exports/ {
+        alias $PROJECT_DIR/exports/;
+        autoindex off;
+        try_files \$uri =404;
+    }
+
     location / {
-        include proxy_params;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
         proxy_pass http://unix:/run/gunicorn_$PROJECT_NAME.sock;
+
+        proxy_connect_timeout 600s;
+        proxy_send_timeout    600s;
+        proxy_read_timeout    600s;
     }
 }
 EOF
