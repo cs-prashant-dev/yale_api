@@ -48,6 +48,12 @@
             style="display: none;"></span>
         <span id="buttoYaleText">Export Yale Data</span>
     </button>
+    <h1>Export Smart Hq Data</h1>
+    <button id="loadingSmartHqButton" class="btn btn-primary" type="button" onclick="exportSmartHqData()">
+        <span id="buttonSmartHqLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
+            style="display: none;"></span>
+        <span id="buttonSmartHqText">Export Smart Hq Data</span>
+    </button>
     <!-- <h1>Export Yale Data</h1>
     <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportData()">
         <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
@@ -58,6 +64,7 @@
         let isEcobbeLoading = false;
         let isYaleLoading = false;
         let isOdooLoading = false;
+        let isSmartHqLoading = false;
         function exportData() {
             if (isEcobbeLoading === true) {
                 alert('Already in progress!');
@@ -101,6 +108,52 @@
                     // document.getElementById('loader').style.display = 'none';
                     isEcobbeLoading = false; // Reset loading
                     updateEcobeeButtonState();
+                });
+        }
+
+        function exportSmartHqData() {
+            if (isSmartHqLoading === true) {
+                alert('Already in progress!');
+                return;
+            }
+            isSmartHqLoading = true;
+            // Show loader and update button
+            updateSmartHqButtonState();
+            // document.getElementById('loader').style.display = 'block';
+            fetch('/export-smarthq-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'smart_hq_devices.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    isSmartHqLoading = false; // Reset loading
+                    updateSmartHqButtonState();
+                    // document.getElementById('loader').style.display = 'none';
+                    alert('Download Completed!');
+                })
+                .catch(error => {
+                    // Compose a detailed user message
+                    const status = error.status || (error.response && error.response.status);
+                    const statusText = error.statusText || (error.response && error.response.statusText);
+                    const msg = error.message || (error.response && error.response.data) || error.toString();
+
+                    let userMessage = `Error: ${msg}`;
+                    if (status) userMessage = `Error ${status}${statusText ? ' (' + statusText + ')' : ''}: ${msg}`;
+
+                    alert(userMessage);
+                    // document.getElementById('loader').style.display = 'none';
+                    isSmartHqLoading = false; // Reset loading
+                    updateSmartHqButtonState();
                 });
         }
 
@@ -183,12 +236,10 @@
             const buttonText = document.getElementById('buttonText');
 
             if (isEcobbeLoading) {
-                // ✅ Loader visible, disable button
                 loader.style.display = 'inline-block';
                 buttonText.innerText = 'Loading...';
                 button.disabled = true;
             } else {
-                // ✅ Loader hidden, enable button
                 loader.style.display = 'none';
                 buttonText.innerText = 'Export Ecobee Data';
                 button.disabled = false;
@@ -227,6 +278,24 @@
                 // ✅ Loader hidden, enable button
                 loader.style.display = 'none';
                 buttonText.innerText = 'Export Yale Data';
+                button.disabled = false;
+            }
+        }
+
+        function updateSmartHqButtonState() {
+            const button = document.getElementById('loadingSmartHqButton');
+            const loader = document.getElementById('buttonSmartHqLoader');
+            const buttonText = document.getElementById('buttonSmartHqText');
+
+            if (isSmartHqLoading) {
+                // ✅ Loader visible, disable button
+                loader.style.display = 'inline-block';
+                buttonText.innerText = 'Loading...';
+                button.disabled = true;
+            } else {
+                // ✅ Loader hidden, enable button
+                loader.style.display = 'none';
+                buttonText.innerText = 'Export Smart Hq Data';
                 button.disabled = false;
             }
         }

@@ -3,6 +3,7 @@ from django.shortcuts import render
 from exporter import ecobee_device_status
 from exporter import sheet_odoo
 from exporter import yale_sheet
+from exporter import smarthq_sheet
 import os
 import logging
 
@@ -42,6 +43,20 @@ def export_odoo_data(request):
 
 def export_yale_data(request):
     output_file = yale_sheet.getYaleData()
+    if output_file and os.path.exists(output_file):
+        try:
+            file = open(output_file, 'rb')
+            response = FileResponse(file, as_attachment=True, filename=output_file)
+            logger.info(f"File '{output_file}' sent successfully.")
+            return response
+        except Exception as file_error:
+            logger.error(f"Error reading or sending the file: {file_error}")
+            return HttpResponse("Error sending the file.", status=500)
+    else:
+        return HttpResponse("Failed to export Ecobee data", status=500)
+
+def export_smarthq_data(request):
+    output_file = smarthq_sheet.getSmartHqData()
     if output_file and os.path.exists(output_file):
         try:
             file = open(output_file, 'rb')

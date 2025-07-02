@@ -6,4 +6,5 @@ urlpatterns = [
     path('export-ecobee/', views.export_ecobee, name='export_ecobee'),
     path('export-odoo-data/', views.export_odoo_data, name='export_odoo_data'),
     path('export-yale-data/', views.export_yale_data, name='export_yale_data'),
+    path('export-smarthq-data/', views.export_smarthq_data, name='export_smarthq_data'),
 ]
