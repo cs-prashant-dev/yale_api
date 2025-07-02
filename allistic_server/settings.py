@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(09i#pwubbw+an&sg#wae-r50^!bd-2!85&z!-d#yw%fc0jlu2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['allistic4.cschat.confidosoft.in']
 
 
 # Application definition
