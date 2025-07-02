@@ -22,7 +22,7 @@ def export_ecobee(request):
             return response
         except Exception as file_error:
             logger.error(f"Error reading or sending the file: {file_error}")
-            return HttpResponse("Error sending the file.", status=500)
+            return HttpResponse("Error sending the file.", status=400)
     else:
         return HttpResponse("Failed to export Ecobee data", status=500)
 
