@@ -1,7 +1,6 @@
 PROJECT_NAME="allistic_server"
-GIT_REPO="https://github.com/cs-prashant-dev/yale_api.git"
 BRANCH="v1"
-SYSTEM_USER="allistic_django"
+SYSTEM_USER="allistic_app_django"
 PROJECT_DIR="/home/$SYSTEM_USER/$PROJECT_NAME"
 
 cd "$PROJECT_DIR"

@@ -90,7 +90,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error:', error);
+                    alert('Error:', error.message);
                     // document.getElementById('loader').style.display = 'none';
                     isEcobbeLoading = false; // Reset loading
                     updateEcobeeButtonState();
