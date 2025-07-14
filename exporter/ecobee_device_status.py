@@ -68,6 +68,7 @@ def get_ecobee_device_status():
                 "location": thermostat_data.get("location"),
                 "brand": thermostat_data.get("brand"),
                 "device": thermostat_data.get("device"),
+                'temperature': '',
                 "isConnected": "API Error - " + status_response.text
             })
                 continue
@@ -81,6 +82,7 @@ def get_ecobee_device_status():
                 "location": thermostat_data.get("location"),
                 "brand": thermostat_data.get("brand"),
                 "device": thermostat_data.get("device"),
+                'temperature': status_data.get("temperature", ''),
                 "isConnected": is_connected
             })
 
