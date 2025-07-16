@@ -9,7 +9,9 @@ CLIENT_ID = 'NsR5cN87qncA26osqWUMNvOSyWrSriwe'
 REFRESH_TOKEN = '-19Ce3YqWXrWmoMLVhXLhU7o4uO3mxezeWT-7R2C0p-gv'
 CLIENT_SECRET = 'j4lsqDQZ2ysignuapxTrXPZhpa1tmtewKuSc1W1KneCWQ61Y_shyQNb6KxtA8v3p'
 # Configuration
-OUTPUT_FILE = "smarthq_devices.xlsx"
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+OUTPUT_FILE = f"smarthq_devices_{timestamp}.xlsx"
 
 def getExchangeSmartHqAccessToken():
     try:
@@ -43,8 +45,7 @@ def getExchangeSmartHqAccessToken():
         print("Access token key not found in response")
     return None
 
-def getExchangeManagementToken():
-    access_token = getExchangeSmartHqAccessToken()
+def getExchangeManagementToken(access_token):
     if not access_token:
         print("Failed to get access token")
         return None
@@ -63,6 +64,57 @@ def getExchangeManagementToken():
         response.raise_for_status()
         # Validate and return management token
         return response.json().get('access_token')
+    except requests.exceptions.RequestException as e:
+        print(f"Management token request failed: {str(e)}")
+    except ValueError as e:
+        print(f"Invalid management token response: {str(e)}")
+    return None
+
+def getUnitsOnFloor(floorId, access_token):
+    # access_token = getExchangeSmartHqAccessToken()
+    if not access_token:
+        print("Failed to get access token")
+        return None
+
+    try:
+        url = f"{API_BASE_URL}/v1/property/floor/{floorId}/unit"
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=100
+        )
+        response.raise_for_status()
+        # Validate and return management token
+        return response.json().get('items', [])
+    except requests.exceptions.RequestException as e:
+        print(f"Management token request failed: {str(e)}")
+    except ValueError as e:
+        print(f"Invalid management token response: {str(e)}")
+    return None
+
+def getListOfFloor(access_token):
+    if not access_token:
+        print("Failed to get access token")
+        return None
+
+    try:
+        url = f"{API_BASE_URL}/v1/property/building/bk96kfu/floor"
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=100
+        )
+        response.raise_for_status()
+        # Validate and return management token
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Management token request failed: {str(e)}")
     except ValueError as e:
@@ -128,7 +180,7 @@ def export_to_excel(devices, filename):
         # Create DataFrame
         df = pd.DataFrame(devices)
         # Export to Excel
-        file_path = os.path.join(settings.BASE_DIR, 'exports', 'unit_device_data.xlsx')
+        file_path = os.path.join(settings.BASE_DIR, 'exports', filename)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         df.to_excel(file_path, index=False)
         # df.to_excel(filename, index=False)
@@ -139,13 +191,32 @@ def export_to_excel(devices, filename):
         return None
 
 def getSmartHqData():
-    management_token = getExchangeManagementToken()
+    access_token = getExchangeSmartHqAccessToken()
+    if not access_token:
+        print("Failed to get access token")
+        return None
+    management_token = getExchangeManagementToken(access_token)
     if management_token is None:
         return None
     else:
+        unitList = []
+        floors = getListOfFloor(access_token)
+
+        for f in floors.get('items', []):
+            floorId = f['unitId']
+            units = getUnitsOnFloor(floorId, access_token)
+            unitList.extend(units)  # Use extend instead of append
         # Fetch and export data
+        unit_map = {unit['unitId']: unit['name'] for unit in unitList}
+
         devices = fetch_all_devices(management_token)
+        filtered_devices = []
+        for device in devices:
+            unitId = device.get('unit')
+            if unitId in unit_map:
+                device['unitName'] = unit_map[unitId]
+                filtered_devices.append(device)
         if devices:
-            return export_to_excel(devices, OUTPUT_FILE)
+            return export_to_excel(filtered_devices, OUTPUT_FILE)
         else:
             return None

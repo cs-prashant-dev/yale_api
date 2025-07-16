@@ -87,14 +87,17 @@ def get_ecobee_device_status():
             })
 
     if results:
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        OUTPUT_FILE = f"ecobee_devices_{timestamp}.xlsx"
         df = pd.DataFrame(results)
-        file_path = os.path.join(settings.BASE_DIR, 'exports', 'ecobee_device_status.xlsx')
+        file_path = os.path.join(settings.BASE_DIR, 'exports', OUTPUT_FILE)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         df.to_excel(file_path, index=False)
         print(f"✅ Data exported to {file_path}")
         # output_file = "ecobee_device_status.xlsx"
         # df.to_excel(output_file, index=False)
-        print("✅ Data exported to ecobee_device_status.xlsx")
+        print(f"✅ Data exported to {OUTPUT_FILE}")
         return file_path
     else:
         print("⚠️ No data to export.")

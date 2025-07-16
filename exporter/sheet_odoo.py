@@ -2,9 +2,39 @@ import requests
 import pandas as pd
 from django.conf import settings
 import os
+import json
 
 BASE_URL = "https://staging.allistic.co"
 COOKIE = 'color_scheme=light; frontend_lang=en_US; session_id=c33110f96f62b8f20cd1de5a0b1983265dd9d4a9'
+
+def update_cookie():
+    global COOKIE  # <-- Allow modification of the global variable
+
+    url = f"{BASE_URL}/web/session/authenticate"
+    payload = json.dumps({
+        "jsonrpc": "2.0",
+        "params": {
+            "db": "staging16",
+            "login": "manager",
+            "password": "manager"
+        }
+    })
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, headers=headers, data=payload)
+    
+    if response.status_code != 200:
+        raise Exception(f"Login failed: {response.status_code} {response.text}")
+
+    # Extract session_id from response cookies
+    session_id = response.cookies.get('session_id')
+    if not session_id:
+        raise Exception("Session ID not found in cookies")
+    # Update the global COOKIE variable
+    COOKIE = f'color_scheme=light; frontend_lang=en_US; session_id={session_id}'
 
 def getUnitsList():
     url = f"{BASE_URL}/get/units"
@@ -347,6 +377,7 @@ def getUnitById(data):
     return result
 
 def getUnitsDataList():
+    update_cookie()
     devices = getUnitsList()
     all_unit_data = []
 
@@ -367,7 +398,10 @@ def getUnitsDataList():
     if all_unit_data:
         df = pd.DataFrame(all_unit_data)
         # file_path = "unit_device_data.xlsx"
-        file_path = os.path.join(settings.BASE_DIR, 'exports', 'unit_device_data.xlsx')
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        OUTPUT_FILE = f"odoo_devices_{timestamp}.xlsx"
+        file_path = os.path.join(settings.BASE_DIR, 'exports', OUTPUT_FILE)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         df.to_excel(file_path, index=False)
         print(f"✅ Data exported to {file_path}")

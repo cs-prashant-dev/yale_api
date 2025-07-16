@@ -76,16 +76,20 @@
             // document.getElementById('loader').style.display = 'block';
             fetch('/export-ecobee')
                 .then(response => {
+                    
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
                     return response.blob();
                 })
                 .then(blob => {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+                    const fileName = `ecobee_devices_${timestamp}.xlsx`;
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'ecobee_device_status.xlsx';
+                    a.download = fileName;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -128,10 +132,13 @@
                     return response.blob();
                 })
                 .then(blob => {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+                    const fileName = `smart_hq_devices_${timestamp}.xlsx`;
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'smart_hq_devices.xlsx';
+                    a.download = fileName;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -174,10 +181,13 @@
                     return response.blob();
                 })
                 .then(blob => {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+                    const fileName = `odoo_devices_${timestamp}.xlsx`;
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'odoo_data.xlsx';
+                    a.download = fileName;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -211,10 +221,13 @@
                     return response.blob();
                 })
                 .then(blob => {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+                    const fileName = `yale_devices_${timestamp}.xlsx`;
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'yale_data.xlsx';
+                    a.download = fileName;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);

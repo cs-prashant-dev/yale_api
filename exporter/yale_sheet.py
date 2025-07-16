@@ -88,9 +88,11 @@ def getYaleData():
         return None
 
 def export_to_excel(data, file_name='locks_details.xlsx'):
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    OUTPUT_FILE = f"yale_devices_{timestamp}.xlsx"
     df = pd.DataFrame(data)
-    file_path = os.path.join(settings.BASE_DIR, 'exports', 'unit_device_data.xlsx')
+    file_path = os.path.join(settings.BASE_DIR, 'exports', OUTPUT_FILE)
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     df.to_excel(file_path, index=False)
-    # file_path = os.path.abspath(file_name)  # Get full absolute path
     return file_path
