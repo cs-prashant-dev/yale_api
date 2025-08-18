@@ -54,6 +54,12 @@
             style="display: none;"></span>
         <span id="buttonSmartHqText">Export Smart Hq Data</span>
     </button>
+    <h1>Export SwiftLane Data</h1>
+    <button id="loadingSwiftLaneButton" class="btn btn-primary" type="button" onclick="exportSwiftLaneData()">
+        <span id="buttonSwiftLaneLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
+            style="display: none;"></span>
+        <span id="buttonSwiftLaneText">Export SwiftLane Data</span>
+    </button>
     <!-- <h1>Export Yale Data</h1>
     <button id="loadingYaleButton" class="btn btn-primary" type="button" onclick="exportData()">
         <span id="buttonYaleLoader" class="spinner-border spinner-border-sm me-2" aria-hidden="true"
@@ -65,6 +71,7 @@
         let isYaleLoading = false;
         let isOdooLoading = false;
         let isSmartHqLoading = false;
+        let isSwiftLaneLoading = false;
         function exportData() {
             if (isEcobbeLoading === true) {
                 alert('Already in progress!');
@@ -243,6 +250,47 @@
                     updateYaleButtonState();
                 });
         }
+
+        function exportSwiftLaneData() {
+            if (isSwiftLaneLoading === true) {
+                alert('Already in progress!');
+                return;
+            }
+            isSwiftLaneLoading = true;
+            // Show loader and update button
+            updateSwiftlaneButtonState();
+            // document.getElementById('loader').style.display = 'block';
+            fetch('export-swiftlane-data/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+                    const fileName = `swiftlane_devices_${timestamp}.xlsx`;
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    isSwiftLaneLoading = false;
+                    updateSwiftlaneButtonState();
+                    alert('Download Completed!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong!');
+                    isSwiftLaneLoading = false;
+                    updateSwiftlaneButtonState();
+                });
+        }
+        
         function updateEcobeeButtonState() {
             const button = document.getElementById('loadingButton');
             const loader = document.getElementById('buttonLoader');
@@ -291,6 +339,24 @@
                 // ✅ Loader hidden, enable button
                 loader.style.display = 'none';
                 buttonText.innerText = 'Export Yale Data';
+                button.disabled = false;
+            }
+        }
+
+        function updateSwiftlaneButtonState() {
+            const button = document.getElementById('loadingSwiftLaneButton');
+            const loader = document.getElementById('buttonSwiftLaneLoader');
+            const buttonText = document.getElementById('buttonSwiftLaneText');
+
+            if (isSwiftLaneLoading) {
+                // ✅ Loader visible, disable button
+                loader.style.display = 'inline-block';
+                buttonText.innerText = 'Loading...';
+                button.disabled = true;
+            } else {
+                // ✅ Loader hidden, enable button
+                loader.style.display = 'none';
+                buttonText.innerText = 'Export SwiftLane Data';
                 button.disabled = false;
             }
         }
