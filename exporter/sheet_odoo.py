@@ -4,21 +4,20 @@ from django.conf import settings
 import os
 import json
 
-BASE_URL = "https://staging.allistic.co"
+BASE_URL = "https://allisticapi.confidosoftsolutions.com"
 COOKIE = 'color_scheme=light; frontend_lang=en_US; session_id=c33110f96f62b8f20cd1de5a0b1983265dd9d4a9'
 
 def update_cookie():
     global COOKIE  # <-- Allow modification of the global variable
 
-    url = f"{BASE_URL}/web/session/authenticate"
+    url = f"{BASE_URL}/api/v1/Auth/login"
     payload = json.dumps({
-        "jsonrpc": "2.0",
-        "params": {
-            "db": "staging16",
-            "login": "manager",
-            "password": "manager"
-        }
-    })
+        "email": "admin@confidosoft.com",
+        "password": "Test@123",
+        "clientType": 0,
+        "deviceId": "string",
+        "rememberMe": True
+        })
 
     headers = {
         'Content-Type': 'application/json'
@@ -30,23 +29,23 @@ def update_cookie():
         raise Exception(f"Login failed: {response.status_code} {response.text}")
 
     # Extract session_id from response cookies
-    session_id = response.cookies.get('session_id')
-    if not session_id:
-        raise Exception("Session ID not found in cookies")
+    access_token = response.json().get('data').get('access_token')
+    if not access_token:
+        raise Exception("Access Token not found in cookies")
     # Update the global COOKIE variable
-    COOKIE = f'color_scheme=light; frontend_lang=en_US; session_id={session_id}'
+    COOKIE = f'{access_token}'
 
 def getUnitsList():
-    url = f"{BASE_URL}/get/units"
+    url = f"{BASE_URL}/api/v1/Unit"
     headers = {
-        'Cookie': COOKIE
+        'Authorization': f'Bearer {COOKIE}'
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        data = response.json()
-        if data.get("status") == "success":
-            units = data.get("units", [])
-            return units
+        data = response.json().get('data').get('items')
+        if data is not None:
+            # units = data.get("units", [])
+            return data
         else:
             print("API returned failure status.")
             return []
@@ -206,179 +205,57 @@ def checkBrandAndCollectResponse(data):
                 "url_called": full_url
             }
 
-# def getUnitById(data):
-#     unit_id = data.get("id")
-#     name = data.get("name")
-#     code = data.get("code")
-#     url = f"{BASE_URL}/get/unit/info?unitId={unit_id}"
-#     headers = {
-#         'Cookie': COOKIE
-#     }
+def getSmartHQResponse(serialNo, accessToken):
+    url = f"https://client.mysmarthq.com/v2/device/{serialNo}"
 
-#     response = requests.get(url, headers=headers)
-#     if response.status_code == 200:
-#         data = response.json()
-#         if data.get("status") == "success":
-#             result = []
-#             unitId_data = data.get("data", [])
-#             for unit in unitId_data:
-#                 devices = unit.get("devices", [])
-#                 if devices:
-#                     for device in devices:
-#                         brandResponse = checkBrandAndCollectResponse(device)
-#                         result.append({
-#                             "unit_id": unit_id,
-#                             "unit_name": name,
-#                             "unit_code": code,
-#                             "available": "Yes",
-#                             "serial_no": device.get("serial_no"),
-#                             "model": device.get("model"),
-#                             "brand": device.get("brand"),
-#                             "category": device.get("category"),
-#                             "location": device.get("location"),
-#                             "name": device.get("name"),
-#                             'api_response': brandResponse if brandResponse else None,
-#                         })
-#                 else:
-#                     result.append({
-#                             "unit_id": unit_id,
-#                             "unit_name": name,
-#                             "unit_code": code,
-#                             "available": "No",
-#                             "serial_no": None,
-#                             "model": None,
-#                             "brand": None,
-#                             "category": None,
-#                             "location": None,
-#                             "name": None,
-#                             'api_response': {
-#                                 "status": "no_devices",
-#                                 "reason": "Unit has no devices"
-#                             },
-#                         })
-#             return result
-#         else:
-#             print("API returned failure status.")
-#             return None
-#     else:
-#         print(f"Request failed with status code {response.status_code}")
-#         return None
-
-def getUnitById(data):
-    unit_id = data.get("id")
-    name = data.get("name")
-    code = data.get("code")
-    url = f"{BASE_URL}/get/unit/info?unitId={unit_id}"
+    payload = {}
     headers = {
-        'Cookie': COOKIE
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {accessToken}'
     }
 
-    result = []
+    response = requests.request("GET", url, headers=headers, data=payload)
 
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            json_data = response.json()
-            if json_data.get("status") == "success":
-                unitId_data = json_data.get("data", [])
-                for unit in unitId_data:
-                    devices = unit.get("devices", [])
-                    if devices:
-                        for device in devices:
-                            brandResponse = checkBrandAndCollectResponse(device)
-                            services = device.get("services", [])
-                            result.append({
-                                "unit_id": unit_id,
-                                "unit_name": name,
-                                "unit_code": code,
-                                "available": "Yes",
-                                "serial_no": device.get("serial_no"),
-                                "model": device.get("model"),
-                                "brand": device.get("brand"),
-                                "category": device.get("category"),
-                                "location": device.get("location"),
-                                "name": device.get("name"),
-                                'api_response': brandResponse,
-                                "isServiceAvailable": True if services else False,
-                            })
-                    else:
-                        result.append({
-                            "unit_id": unit_id,
-                            "unit_name": name,
-                            "unit_code": code,
-                            "available": "No",
-                            "serial_no": None,
-                            "model": None,
-                            "brand": None,
-                            "category": None,
-                            "location": None,
-                            "name": None,
-                            "isServiceAvailable": None,
-                            'api_response': {
-                                "status": "no_devices",
-                                "reason": "Unit has no devices"
-                            },
-                        })
-            else:
-                result.append({
-                    "unit_id": unit_id,
-                    "unit_name": name,
-                    "unit_code": code,
-                    "available": "No",
-                    "serial_no": None,
-                    "model": None,
-                    "brand": None,
-                    "category": None,
-                    "location": None,
-                    "name": None,
-                    "isServiceAvailable":  None,
-                    'api_response': {
-                        "status": "api_error",
-                        "reason": f"API response status != success {json_data}"
-                    },
-                })
-        else:
+    print(response.text)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+def getUnitById(data):
+    # unit_id = data.get("id")
+    # name = data.get("name")
+    # code = data.get("propertyId")
+    # url = f"{BASE_URL}/validate/user/{unit_id}"
+    # headers = {
+    #     'Authorization': f'Bearer {COOKIE}'
+    # }
+
+    result = []
+    serialNo = data
+    brandResponse = getSmartHQResponse(serialNo, 'ue1cpzabo957d4aoiu0zjebfor88rh44')
+    if brandResponse is not None:
+        deviceType = brandResponse.get('deviceType')
+        deviceName = deviceType.split(".")[-1].capitalize()
+        services = brandResponse.get("services", [])
+        for service in services:
             result.append({
-                "unit_id": unit_id,
-                "unit_name": name,
-                "unit_code": code,
-                "available": "No",
-                "serial_no": None,
-                "model": None,
-                "brand": None,
-                "category": None,
-                "location": None,
-                "name": None,
-                "isServiceAvailable":  None,
-                'api_response': {
-                    "status": "http_error",
-                    "reason": f"HTTP status {response.status_code}"
-                },
-            })
-    except requests.RequestException as e:
-        result.append({
-            "unit_id": unit_id,
-            "unit_name": name,
-            "unit_code": code,
-            "available": "No",
-            "serial_no": None,
-            "model": None,
-            "brand": None,
-            "category": None,
-            "location": None,
-            "name": None,
-            "isServiceAvailable":  None,
-            'api_response': {
-                "status": "exception",
-                "reason": str(e)
-            },
-        })
+                                            "deviceType": deviceType,
+                                            "deviceName": deviceName,
+                                            "serviceType": service.get('serviceType'),
+                                            "domainType": service.get('domainType'),
+                                            "supportedCommands": service.get('supportedCommands'),
+                                            "state": service.get('state'),
+                                            "serviceId": service.get("serviceId"),
+                                            "serviceDeviceType": service.get("serviceDeviceType"),
+                                            "config": service.get("config"),
+                                        })
 
     return result
 
 def getUnitsDataList():
-    update_cookie()
-    devices = getUnitsList()
+    # update_cookie()
+    # devices = getUnitsList()
     all_unit_data = []
 
     # unit_data = getUnitById({
@@ -388,6 +265,8 @@ def getUnitsDataList():
     #     })
     # if unit_data:
     #     all_unit_data.extend(unit_data)
+    df = pd.read_excel("smart_hq_devices_2025-08-14_10-17-22.xlsx", usecols=["deviceId"])
+    devices = df["deviceId"].tolist()
     for d in devices:
         unit_data = getUnitById(d)
         if unit_data:
